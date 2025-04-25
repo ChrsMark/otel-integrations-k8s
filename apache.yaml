@@ -1,0 +1,20 @@
+podAnnotations:
+  otel.logs.example: "true"
+  # TODO: receiver_creator does not support that yet
+#  io.opentelemetry.discovery.logs.apache/enabled: "true"
+#  io.opentelemetry.discovery.logs.apache/config: |
+#    # Configure filelog receiver to read the Apache logs
+#    start_at: end
+#    operators:
+#      # Operator to parse the container logs
+#      - type: container
+#        id: container-parser
+#      # Operator to parse the Apache logs
+#      # This operator uses a regex to parse the logs
+#      - id: some
+#        type: add
+#        field: attributes.tag
+#        value: hints
+#      - id: apache-logs
+#        type: regex_parser
+#        regex: ^(?P<source_ip>\d+\.\d+.\d+\.\d+)\s+-\s+-\s+\[(?P<timestamp_log>\d+/\w+/\d+:\d+:\d+:\d+\s+\+\d+)\]\s"(?P<http_method>\w+)\s+(?P<http_path>.*)\s+(?P<http_version>.*)"\s+(?P<http_code>\d+)\s+(?P<http_size>\d+)$

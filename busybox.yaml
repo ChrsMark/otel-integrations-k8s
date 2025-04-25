@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemonset-logs
+  labels:
+    app: daemonset-logs
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: migration-logger
+      otel.logs: "true"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: migration-logger
+        otel.logs: "true"
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+        - name: lazybox
+          image: busybox
+          args:
+            - /bin/sh
+            - -c
+            - while true; do echo "otel logs at $(date +%H:%M:%S)" && sleep 5s; done
+        - name: busybox
+          image: busybox
+          args:
+            - /bin/sh
+            - -c
+            - while true; do echo "otel logs at $(date +%H:%M:%S)" && sleep 1s; done

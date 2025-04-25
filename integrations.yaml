@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-integrations
+data:
+  apache.yaml: |-
+    receivers:
+      filelog:
+        include: ${var:paths}
+        start_at: beginning
+        include_file_path: true
+        include_file_name: false
+        operators:
+        # Operator to parse the container logs
+        - type: container
+          id: container-parser
+        # Operator to parse the Apache logs
+        # This operator uses a regex to parse the logs
+        - id: apache-logs
+          type: regex_parser
+          regex: ^(?P<source_ip>\d+\.\d+.\d+\.\d+)\s+-\s+-\s+\[(?P<timestamp_log>\d+/\w+/\d+:\d+:\d+:\d+\s+\+\d+)\]\s"(?P<http_method>\w+)\s+(?P<http_path>.*)\s+(?P<http_version>.*)"\s+(?P<http_code>\d+)\s+(?P<http_size>\d+)$
+
+    processors:
+      transform/resource:
+        log_statements:
+          - set(log.attributes["resource"], "${var:resource}")
+
+    pipelines:
+      logs:
+        receiver: filelog
+        processors:
+          - transform/resource

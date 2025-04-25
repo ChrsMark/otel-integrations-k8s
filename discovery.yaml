@@ -1,0 +1,87 @@
+mode: daemonset
+
+#image:
+#  repository: otel/opentelemetry-collector-contrib
+#  tag: latest
+
+image:
+  repository: chrismark/otelcontribcol-dev
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+clusterRole:
+  create: true
+  rules:
+    - apiGroups:
+        - ''
+      resources:
+        - 'pods'
+        - 'nodes'
+      verbs:
+        - 'get'
+        - 'list'
+        - 'watch'
+    - apiGroups: [ "" ]
+      resources: [ "nodes/proxy"]
+      verbs: [ "get" ]
+    - apiGroups:
+        - ""
+      resources:
+        - nodes/stats
+      verbs:
+        - get
+    - nonResourceURLs:
+        - "/metrics"
+      verbs:
+        - get
+
+extraVolumeMounts:
+  - name: varlogpods
+    mountPath: /var/log/pods
+    readOnly: true
+  - name: integrations
+    mountPath: /etc/opentelemetry/integrations
+    readOnly: true
+
+extraVolumes:
+  - name: varlogpods
+    hostPath:
+      path: /var/log/pods
+  - name: integrations
+    configMap:
+      name: otel-integrations
+
+config:
+  extensions:
+    file_integrations:
+      path: "/etc/opentelemetry/integrations"
+    k8s_observer:
+      auth_type: serviceAccount
+      node: ${env:K8S_NODE_NAME}
+    health_check:
+      endpoint: ${env:MY_POD_IP}:13133
+  exporters:
+    debug:
+      verbosity: basic
+    debug/2:
+      verbosity: detailed
+
+  receivers:
+    receiver_creator/logs_dynamic:
+      watch_observers: [ k8s_observer ]
+      receivers:
+        integration:
+          rule: type == "pod.container" && container_name == "apache"
+          config:
+            name: "apache"
+            pipelines: ["logs"]
+            parameters:
+              paths: "/var/log/pods/`pod.namespace`_`pod.name`_`pod.uid`/`container_name`/*.log"
+              resource: "`pod.uid`"
+
+  service:
+    extensions: [health_check, k8s_observer, file_integrations]
+    pipelines:
+      logs/discovery:
+        receivers: [ receiver_creator/logs_dynamic ]
+        exporters: [ debug/2 ]
