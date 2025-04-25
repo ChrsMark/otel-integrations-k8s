@@ -21,6 +21,8 @@ docker tag elastic-collector-components:oteldev otelcontribcol-dev:latest && kin
 ```console
 k apply -f integrations.yaml
 ```
+Note: alternatively you can use the PVC approach and the init container to fetch the integrations from a remote repo.
+See how it works in the extra section.
 3. Deploy the Collector:
 ```console
 helm install collector oci://ghcr.io/open-telemetry/opentelemetry-helm-charts/opentelemetry-collector --version 0.119.1 --values discovery.yaml 
@@ -66,3 +68,19 @@ Trace ID:
 Span ID:
 Flags: 0
 ```
+6. Do the same for the NGINX workload:
+```console
+ helm install apache oci://registry-1.docker.io/bitnamicharts/apache --version 11.3.5 --values nginx.yaml
+```
+
+### Using a PVC to store integrations
+
+Using ConfigMaps to store multiple integration files can be limiting. Alternatively users can create a PVC
+and have the Collector Helm chart to download (in a PersistenVolume that uses the PVC) the integrations files
+using an init container to fetch them from remore repository.
+
+1. Create the PVC:
+```console
+k apply -f integrations_pvc.yaml
+```
+2. Comment out the init container section and the `integrations-configs` Volume.

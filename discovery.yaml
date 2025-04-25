@@ -35,6 +35,17 @@ clusterRole:
       verbs:
         - get
 
+initContainers:
+- name: git-clone
+  image: alpine/git
+  command: ["/bin/sh", "-c", "if [ ! -d /etc/opentelemetry/integrations/.git ]; then git clone https://github.com/ChrsMark/otel-integrations.git /etc/opentelemetry/integrations; fi"]
+  #command: ["sh", "-c"]
+  #args:
+  #  - git clone https://github.com/ChrsMark/otel-integrations.git /etc/opentelemetry/integrations
+  volumeMounts:
+    - name: integrations-configs # use the name of the volume used for persistence
+      mountPath: /etc/opentelemetry/integrations # use the path given as per `extraVolumeMounts[integrations].mountPath`
+
 extraVolumeMounts:
   - name: varlogpods
     mountPath: /var/log/pods
@@ -50,6 +61,9 @@ extraVolumes:
   - name: integrations
     configMap:
       name: otel-integrations
+  - name: integrations-configs
+    persistentVolumeClaim:
+      claimName: otel-integrations-pvc
 
 config:
   extensions:

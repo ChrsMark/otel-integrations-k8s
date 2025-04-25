@@ -42,7 +42,7 @@ data:
             id: container-parser
           # Operator to parse the Nginx logs
           # This operator uses a regex to parse the logs
-          - id: apache-logs
+          - id: nginx-logs
             type: regex_parser
             regex: ^(?P<source_ip>\d+\.\d+.\d+\.\d+)\s+-\s+-\s+\[(?P<timestamp_log>[^\]]+)\] "(?P<http_method>\S+) (?P<http_path>\S+) (?P<http_version>[^"]+)" (?P<http_code>\d{3}) (?P<http_size>\d+) "(?P<referrer>[^"]*)" "(?P<user_agent>[^"]*)"
     processors:
