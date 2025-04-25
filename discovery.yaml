@@ -71,13 +71,29 @@ config:
       watch_observers: [ k8s_observer ]
       receivers:
         integration:
-          rule: type == "pod.container" && container_name == "apache"
+          rule: type == "pod.container" && pod.annotations["otel.logs"] == "true"
           config:
-            name: "apache"
+            name: "`pod.annotations[\"otel.logs.integration_name\"]`"
             pipelines: ["logs"]
             parameters:
               paths: "/var/log/pods/`pod.namespace`_`pod.name`_`pod.uid`/`container_name`/*.log"
               resource: "`pod.uid`"
+#        integration/apache:
+#          rule: type == "pod.container" && container_name == "apache"
+#          config:
+#            name: "apache"
+#            pipelines: [ "logs" ]
+#            parameters:
+#              paths: "/var/log/pods/`pod.namespace`_`pod.name`_`pod.uid`/`container_name`/*.log"
+#              resource: "`pod.uid`"
+#        integration/nginx:
+#          rule: type == "pod.container" && container_name == "nginx"
+#          config:
+#            name: "nginx"
+#            pipelines: [ "logs" ]
+#            parameters:
+#              paths: "/var/log/pods/`pod.namespace`_`pod.name`_`pod.uid`/`container_name`/*.log"
+#              resource: "`pod.uid`"
 
   service:
     extensions: [health_check, k8s_observer, file_integrations]

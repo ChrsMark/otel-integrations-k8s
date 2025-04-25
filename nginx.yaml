@@ -1,6 +1,6 @@
 podAnnotations:
   otel.logs: "true"
-  otel.logs.integration_name: "apache"
+  otel.logs.integration_name: "nginx"
 
   # TODO: receiver_creator does not support that yet
 #  io.opentelemetry.discovery.logs.apache/enabled: "true"
