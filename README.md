@@ -77,7 +77,7 @@ Flags: 0
 
 Using ConfigMaps to store multiple integration files can be limiting. Alternatively users can create a PVC
 and have the Collector Helm chart to download (in a PersistenVolume that uses the PVC) the integrations files
-using an init container to fetch them from remore repository.
+using an init container to fetch them from remote repository (i.e. https://github.com/ChrsMark/otel-integrations).
 
 1. Create the PVC:
 ```console
